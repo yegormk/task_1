@@ -1,0 +1,57 @@
+.main{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.colon{
+    display: inline-block;
+}
+.stopwatch{
+    font-size: 4.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.buttons{
+    display: flex;
+}
+.button{
+    padding: .2rem 1.2rem;
+    color: white;
+    font-size: 2rem;
+    text-align: center;
+    border-radius: .4rem;
+    cursor: pointer;
+}
+.start{
+    background: rgb(17, 172, 17);
+}
+.reset{
+    margin: 0rem .5rem;
+    background: rgb(223, 223, 23);
+}
+.stop{
+    background: rgb(227, 27, 27);
+}
+#wait{
+    background: rgb(117, 115, 115);
+}
+
+.start:hover{
+    background: rgb(21, 209, 21);
+    transition: .2s;
+}
+.reset:hover{
+    background: rgb(250, 250, 36);
+    transition: .2s;
+}
+.stop:hover{
+    background: rgb(235, 59, 59);
+    transition: .2s;
+}
+#wait:hover{
+    background: rgb(150, 147, 147);
+    transition: .2s;
+}

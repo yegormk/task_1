@@ -1,0 +1,14 @@
+<main class="main">
+    <div class="stopwatch">
+      <span class="hours">{{ showHours }}</span>
+      <p class="colon">:</p>
+      <span class="minutes">{{ showMinutes }}</span>
+      <p class="colon">:</p>
+      <span class="seconds">{{ showSeconds }}</span>
+    </div>
+    <div class="buttons">
+      <button class="button" [ngClass]="{ start:!isRunning, stop:isRunning }" (click)="startStop(!isRunning)">{{ buttonStatus }}</button>
+      <button class="button reset" (click)="reset()">Reset</button>
+      <button class="button" id="wait" (click)="wait($event)">Wait</button>
+    </div>
+</main>

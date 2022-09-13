@@ -7,88 +7,61 @@ import { Observable, timer, Subscription } from 'rxjs';
   styleUrls: ['./app.component.css']
 })
 export class AppComponent {
+  showSeconds = 0;
   seconds = 0;
-  minutes = 0;
-  hours = 0;
-  buttonStatus = 'Start';
+  buttonTitle = 'Start';
   isRunning = false;
-  waitStatus = false;
-  showSeconds = '00';
-  showMinutes = '00';
-  showHours = '00';
-  obsTimer$: Observable<number> = timer(0, 1000);
+  isDisabledStartStop = false;
+  isDisabledReset = true;
+  isDisabledWait = true;
+  isWaiting = false;
+
+  Timer$: Observable<number> = timer(0, 1000);
   subscription!: Subscription;
   timeFirstClick!: number;
   
   
-  startStop(status:boolean){
-    console.log(status);
-    if(status && !this.waitStatus){
+  startStop(status:boolean) {
+    if (status) {
+      this.isDisabledWait = false;
+      this.isDisabledReset = true;
       this.isRunning = status;
-      this.buttonStatus = 'Stop';
-      this.subscription = this.obsTimer$.subscribe(() => {
-      this.seconds += 1;
-        if(this.seconds <= 9){
-          this.showSeconds = "0" + this.seconds;
-        }
-        if (this.seconds > 9){
-          this.showSeconds = this.seconds.toString();
-        }
-        if (this.seconds === 60) {
-          this.minutes++;
-          this.showMinutes = "0" + this.minutes;
-          this.seconds = 0;
-          this.showSeconds = "0" + 0;
-        }
-
-        if (this.minutes > 9){
-          this.showMinutes = this.minutes.toString();
-        }
-        if (this.minutes === 60) {
-
-          this.hours++;
-          this.showHours = "0" + this.showHours;
-          this.minutes = 0;
-          this.showMinutes = "0" + 0;
-        } 
-
-        if (this.hours > 9){
-          this.showHours = this.hours.toString();
-        }
-
-        
+      this.buttonTitle = 'Stop';
+      this.subscription = this.Timer$.subscribe(() => {
+        this.seconds += 1;
+        this.showSeconds = this.seconds;
       });
-    } else if (!this.waitStatus) {
-      this.isRunning = status;
-      this.buttonStatus = 'Start';
-      this.showSeconds = '00';
-      this.showMinutes = '00';
-      this.showHours = '00';
+    } else if (!this.isWaiting) {
+      this.isDisabledWait = true;
+      this.isDisabledReset = false;
+      this.isRunning = status; 
+      this.buttonTitle = 'Start'; 
+      this.showSeconds = 0;
       this.subscription.unsubscribe();
     }
   }
 
-  reset(){
-    if(!this.isRunning){
-      this.seconds = 0;
-      this.minutes = 0;
-      this.hours = 0;
-      this.showSeconds = '00';
-      this.showMinutes = '00';
-      this.showHours = '00';
+  reset() {
+    if (this.isRunning) {
+      return
     }
+
+    this.seconds = 0;
+    this.showSeconds = this.seconds;
   }
 
-  wait(event: MouseEvent){
-
-    if (event.timeStamp - this.timeFirstClick < 300){
-      console.log(Math.round(event.timeStamp - this.timeFirstClick));
-      if (this.subscription && this.isRunning){
-        if(!this.waitStatus){
+  wait(event: MouseEvent) {
+    if (event.timeStamp - this.timeFirstClick < 300) {
+      if (this.subscription && this.isRunning) {
+        if (!this.isWaiting) {
+          this.isDisabledReset = true;
+          this.isDisabledStartStop = true;
           this.subscription.unsubscribe();
-          this.waitStatus = !this.waitStatus;
+          this.isWaiting = !this.isWaiting;
         } else {
-          this.waitStatus = !this.waitStatus;
+          this.isDisabledReset = false;
+          this.isDisabledStartStop = false;
+          this.isWaiting = !this.isWaiting;
           this.startStop(this.isRunning);
         }
 

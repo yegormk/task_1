@@ -1,25 +1,37 @@
 <main class="main">
-    <div class="stopwatch">
-      <p>{{ showSeconds | displayTime }}</p>
-    </div>
-    <div class="buttons">
-      <button 
-        mat-raised-button 
-        [disabled]="isDisabledStartStop" 
-        [ngClass] = "{ start:!isRunning, stop:isRunning }" 
-        (click) = "startStop(!isRunning)"
-      >{{ buttonTitle }}</button>
-      <button 
-        mat-raised-button 
-        [disabled]="isDisabledReset" 
-        class="reset" 
-        (click)="reset()"
-      >Reset</button>
-      <button 
-        mat-raised-button 
-        [disabled]="isDisabledWait" 
-        class="wait" 
-        (click)="wait($event)"
-      >Wait</button>
-    </div>
+  <div class="stopwatch">
+    <p>
+      {{ ((seconds$ | async) || 0) * 1000 | date: 'HH:mm:ss' : 'UTC' }}
+    </p>
+  </div>
+
+  <div class="buttons">
+    <button 
+      mat-raised-button 
+      *ngIf="!(start$| async)"
+      class="start" 
+      (click)="start()"
+    >Start</button>
+
+    <button 
+      mat-raised-button 
+      *ngIf="start$| async"
+      class="stop" 
+      (click)="stop()"
+    >Stop</button>
+
+    <button 
+      mat-raised-button 
+      [disabled]="!(seconds$ | async)" 
+      class="reset" 
+      (click)="reset()"
+    >Reset</button>
+
+    <button 
+      mat-raised-button 
+      [disabled]="!(start$| async)" 
+      class="wait" 
+      (click)="wait()"
+    >Wait</button>
+  </div>
 </main>

@@ -1,74 +1,76 @@
-import { Component } from '@angular/core';
-import { Observable, timer, Subscription } from 'rxjs';
+import { Component, OnInit } from '@angular/core';
+import {
+  timer,
+  map, 
+  Subject, 
+  BehaviorSubject, 
+  withLatestFrom, 
+  switchMap, 
+  takeUntil, 
+  pairwise, 
+  filter,
+} from 'rxjs';
 
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.css']
 })
-export class AppComponent {
-  showSeconds = 0;
-  seconds = 0;
-  buttonTitle = 'Start';
-  isRunning = false;
-  isDisabledStartStop = false;
-  isDisabledReset = true;
-  isDisabledWait = true;
-  isWaiting = false;
+export class AppComponent implements OnInit{
 
-  Timer$: Observable<number> = timer(0, 1000);
-  subscription!: Subscription;
-  timeFirstClick!: number;
+  ngOnInit(): void {
+    this.sunscribeStart();
+    this.subscribeWait();
+  }
+
+  seconds$ = new BehaviorSubject<number>(0);
+
+  start$ = new Subject<boolean>();
+  stop$ = new Subject<void>();
+  wait$ = new Subject<void>();
   
-  
-  startStop(status:boolean) {
-    if (status) {
-      this.isDisabledWait = false;
-      this.isDisabledReset = true;
-      this.isRunning = status;
-      this.buttonTitle = 'Stop';
-      this.subscription = this.Timer$.subscribe(() => {
-        this.seconds += 1;
-        this.showSeconds = this.seconds;
-      });
-    } else if (!this.isWaiting) {
-      this.isDisabledWait = true;
-      this.isDisabledReset = false;
-      this.isRunning = status; 
-      this.buttonTitle = 'Start'; 
-      this.showSeconds = 0;
-      this.subscription.unsubscribe();
-    }
+  start(): void {
+    this.start$.next(true);
   }
 
-  reset() {
-    if (this.isRunning) {
-      return
-    }
-
-    this.seconds = 0;
-    this.showSeconds = this.seconds;
+  stop(): void {
+    this.seconds$.next(0);
+    this.start$.next(false);
+    this.stop$.next();
   }
 
-  wait(event: MouseEvent) {
-    if (event.timeStamp - this.timeFirstClick < 300) {
-      if (this.subscription && this.isRunning) {
-        if (!this.isWaiting) {
-          this.isDisabledReset = true;
-          this.isDisabledStartStop = true;
-          this.subscription.unsubscribe();
-          this.isWaiting = !this.isWaiting;
-        } else {
-          this.isDisabledReset = false;
-          this.isDisabledStartStop = false;
-          this.isWaiting = !this.isWaiting;
-          this.startStop(this.isRunning);
-        }
-
-      }
-    } else {
-      this.timeFirstClick = event.timeStamp;
-    }
+  reset(): void {
+    this.stop();
+    this.start();
   }
+
+  wait(): void {
+    this.wait$.next()
+  }
+
+  sunscribeStart(): void {
+    this.start$.pipe(
+      withLatestFrom(this.seconds$),
+      switchMap(([valueFromStartSubject, currentSeconds]) => {
+        return timer(0, 1000).pipe(
+          map(timerValue => timerValue + currentSeconds),
+          takeUntil(this.stop$),
+        );
+      }),
+    ).subscribe( (time) => {
+      this.seconds$.next(time);
+    });
+  }
+
+  subscribeWait(): void {
+    this.wait$.pipe(
+      map(() => new Date()),
+      pairwise(),
+      filter(([date1, date2]) => (date2.getTime() - date1.getTime()) <= 300 ),
+    ).subscribe(() => {
+      (this.stop$.observed) ? this.stop$.next() : this.start$.next(true);
+    });
+  }
+
 }
   
